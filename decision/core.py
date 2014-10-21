@@ -51,6 +51,9 @@ class DecisionSet:
     def get_by_index(self, index):
         return self._decision_paths_dict.get(index)
 
+    def get_decision_paths(self):
+        return self._decision_paths
+
     def find_best_property(self):
         """
         根据每个决策属性的香农熵，选择最适合分割的决策属性
@@ -72,12 +75,15 @@ class DecisionSet:
         :return:决策子集合
         """
         sub_sets = {}
+        sub_decision_paths = {}
         for decision_path in self._decision_paths:
             new_decision_path = copy.deepcopy(decision_path)
             pro_value = new_decision_path.pop_property(property_name)
-            if not pro_value in sub_sets:
-                sub_sets[pro_value] = []
-            sub_sets[pro_value].append(new_decision_path)
+            if not pro_value in sub_decision_paths:
+                sub_decision_paths[pro_value] = []
+            sub_decision_paths[pro_value].append(new_decision_path)
+        for (k,v) in sub_decision_paths.items():
+            sub_sets[k] = DecisionSet(v)
         return sub_sets
 
     def _calc_shannon_entropy(self, decision_frame):
