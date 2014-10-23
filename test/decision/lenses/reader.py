@@ -6,7 +6,7 @@ from decision.core import DecisionPath, DecisionSet
 titles = ['age', 'spectacle prescription', 'astigmatic', 'tear rate']
 
 
-def _read_decision_paths():
+def read_decision_paths():
     decision_paths = []
     try:
         with open("lenses.data", 'r') as file:
@@ -35,10 +35,3 @@ def _build_path(path_str):
         else:
             tmp = tmp + s
     return paths
-
-
-if __name__ == '__main__':
-    decision_paths = _read_decision_paths()
-    decision_set = DecisionSet(decision_paths)
-    property_name = decision_set.find_best_property()
-    print(decision_set.split_by_property(property_name))
