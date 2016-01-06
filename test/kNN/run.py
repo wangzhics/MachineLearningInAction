@@ -18,10 +18,10 @@ def get_neighbors(file_folder_path):
     return neighbors
 
 if __name__ == '__main__':
-    neighbors = get_neighbors("digits\\trainingDigits")
-    for file_path in get_sub_file("digits\\testDigits"):
+    neighbors = get_neighbors("digits/trainingDigits")
+    for file_path in get_sub_file("digits/testDigits"):
         label = get_file_label(file_path)
-        path = os.path.join("digits\\testDigits", file_path)
+        path = os.path.join("digits/testDigits", file_path)
         target_properties = get_properties(path)
         euclidean_factory = EuclideanAlgorithmFactory()
         euclidean_algorithm = euclidean_factory.get_algorithm()
