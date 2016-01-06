@@ -1,153 +1,73 @@
-#coding=utf-8
-#当有中文注释时，必须加上文件编码信息，否则在Window下调试会出错
-__author__ = 'WangZhi'
-
-import copy
-from pandas import Series, DataFrame
+# coding=utf-8
+# 当有中文注释时，必须加上文件编码信息，否则在Window下调试会出错
+from pandas import DataFrame
 from math import log2
 
 
-class DecisionPath:
+def calc_shannon_entropy(labels_array):
     """
-    决策项，该对象包括索引，决策属性，决策结果三个属性
+    calculate the shannon entropy of a label array
+    :param labels_array: the label array
+    :return: the shannon entropy
     """
-    def __init__(self, index, properties, decision):
-        self._index = index
-        self._properties = properties
-        self._decision = decision
-
-    def get_index(self):
-        return self._index
-
-    def get_properties(self):
-        return self._properties
-
-    def get_decision(self):
-        return self._decision
-
-    def pop_property(self, property_name):
-        return self._properties.pop(property_name)
-
-    def equal_properties(self, other):
-        if other is None:
-            return False
-        other_properties = other.get_properties()
-        if len(self._properties) != len(other_properties):
-            return False
-        for (k, v) in self._properties.items():
-            if v != other_properties[k]:
-                return False
-        return True
-
-    def __str__(self):
-        return '{index:' + self._index + ', properties:' + str(self._properties) + \
-               ', decision:' + self._decision + '}'
-
-    def __eq__(self, other):
-        if not isinstance(other, DecisionPath):
-            return False
-        if not (self._index and self._decision):
-            return False
-        if self._index != other._index:
-            return False
-        if self._decision != other._decision:
-            return False
-        other_properties = other.get_properties()
-        if len(self._properties) != len(other_properties):
-            return False
-        for i in len(self._properties):
-            if self._properties[i] != other_properties[i]:
-                return False
-        return True
+    labels_length = len(labels_array)
+    labels_dict = {}
+    for label in labels_array:
+        if label not in labels_dict:
+            labels_dict[label] = 0
+        labels_dict[label] += 1
+    entropy = 0
+    for label, label_count in labels_dict.items():
+        prob = float(label_count) / labels_length
+        entropy -= prob * log2(prob)
+    return entropy
 
 
-class DecisionSet:
+def split_by_feature(parent_frame, feature):
     """
-    决策集合
+    split a data frame by a feature
+    :param parent_frame: data frame
+    :param feature: the feature name
+    :return: sub frame
     """
-    def __init__(self, decision_paths):
-        self._decision_paths = []
-        if decision_paths:
-            self.add_paths(decision_paths)
-
-    def add_paths(self, decision_paths):
-        for decision_path in decision_paths:
-            self.add_path(decision_path)
-
-    def add_path(self, decision_path):
-        if len(self._decision_paths) > 0:
-            # 检查是否重复
-            for self_path in self._decision_paths:
-                if self_path.equal_properties(decision_path):
-                    if self_path.get_decision() == decision_path.get_decision():
-                        #不添加重复的决策路径，相同的的决策属性，相同的决策结果
-                        print('决策路径【' + str(decision_path.get_index) +
-                                '】和【' + self_path.get_index() + '】有相同的的决策属性和决策结果，不重复添加')
-                    else:
-                        #相同的的决策属性，不同的决策结果抛出异常
-                        raise DecisionException('决策路径【' + str(decision_path.get_index) +
-                                '】和【' + self_path.get_index() + '】有相同的的决策属性却有不同的决策结果')
-            #检查决策属性个数是否一致
-            if len(self._decision_paths[0].get_properties()) != len(decision_path.get_properties()):
-                raise DecisionException('决策路径【' + str(decision_path.get_index) +
-                        '】决策属性个数不一致，默认为【' + str(len(self._decision_paths[0].get_properties())) + '】，但其为【' + str(len(decision_path.get_properties())) + '】')
-        self._decision_paths.append(decision_path)
-
-    def get_decision_paths(self):
-        return self._decision_paths
-
-    def find_best_property(self):
-        """
-        根据每个决策属性的香农熵，选择最适合分割的决策属性
-        :return:最适合分割的决策属性
-        """
-        decision_index = []
-        decision_series = []
-        for decision_path in self._decision_paths:
-            decision_index.append(decision_path.get_index())
-            decision_series.append(Series(decision_path.get_properties()))
-        decision_frame = DataFrame(decision_series, index=decision_index)
-        entropy_frame = self._calc_shannon_entropy(decision_frame)
-        return entropy_frame.index[0]
-
-    def split_by_property(self, property_name):
-        """
-        根据选择的决策属性分割决策集合成为几个子集合
-        :param property_name:选择的决策属性名称
-        :return:决策子集合
-        """
-        sub_sets = {}
-        sub_decision_paths = {}
-        for decision_path in self._decision_paths:
-            new_decision_path = copy.deepcopy(decision_path)
-            pro_value = new_decision_path.pop_property(property_name)
-            if not pro_value in sub_decision_paths:
-                sub_decision_paths[pro_value] = []
-            sub_decision_paths[pro_value].append(new_decision_path)
-        for (value, sub_paths) in sub_decision_paths.items():
-            sub_sets[value] = DecisionSet(sub_paths)
-        return sub_sets
-
-    def _calc_shannon_entropy(self, decision_frame):
-        index_length = len(decision_frame.index)
-        #计算每一列的香农熵
-        entropy_all = {}
-        for col in decision_frame.columns:
-            #计算每一列中各个值出现的个数
-            col_df = decision_frame[col].fillna('None')
-            count_series = col_df.value_counts()
-            #计算熵值
-            shannon_entropy = 0.0
-            for c in count_series:
-                prob = float(c)/index_length
-                shannon_entropy -= prob * log2(prob)
-            entropy_all[col] = shannon_entropy
-        entropy_frame = DataFrame(Series(entropy_all), columns=['entropy'])
-        #按降序排序
-        return entropy_frame.sort(columns='entropy', ascending=False)
+    frame_dict = {}
+    # count and split the feature group
+    parent_columns = parent_frame.columns
+    for parent_row in parent_frame.iterrows():
+        # get feature value
+        f_value = parent_row[1][feature]
+        if f_value not in frame_dict:
+            frame_dict[f_value] = DataFrame([], columns=parent_frame.columns)
+        frame_dict[f_value] = frame_dict[f_value].append(parent_row[1], ignore_index=True)
+    # remove the useless feature
+    for f, frame in frame_dict.items():
+        frame.pop(feature)
+    return frame_dict
 
 
-class DecisionException(Exception):
-    def __init__(self, msg):
-        Exception.__init__(self)
-        self._msg = msg
+def get_best_feature(data_frame):
+    # get result column
+    frame_columns = data_frame.columns
+    feature_count = len(frame_columns) - 1
+    result_title = frame_columns[feature_count]
+    base_entropy = calc_shannon_entropy(data_frame[result_title])
+    # start to traversal all feature to find best feature
+    base_feature = ''
+    base_info_gain = 0.0
+    parent_frame_length = len(data_frame)
+    for i in range(feature_count):
+        # calc the entropy if split by this feature
+        feature_title = frame_columns[i]
+        sub_frames = split_by_feature(data_frame, feature_title)
+        sub_entropy = 0.0
+        for feature_value, sub_frame in sub_frames.items():
+            # print("feature[%s-%d]'s info gain is %s" % (feature_title, feature_value, str(sub_frame)))
+            prob = len(sub_frame) / float(parent_frame_length)
+            sub_entropy += prob * calc_shannon_entropy(sub_frame[result_title])
+        info_gain = base_entropy - sub_entropy
+        # print("feature[%s]'s info gain is %f" % (feature_title, info_gain))
+        if info_gain > base_info_gain:
+            base_feature = feature_title
+            base_info_gain = info_gain
+    return base_feature
+

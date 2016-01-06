@@ -1,14 +1,8 @@
-__author__ = 'WangZhi'
-
-import os
-from pandas import Series, DataFrame
 from decision.tree import *
-
+from test.decision.lenses.reader import *
 
 
 if __name__ == '__main__':
-    # decision_paths = read_decision_paths("data\\lenses.txt")
-    columns = ['no surfacing', 'flipper', 'value']
-    # df = DataFrame(decision_paths, columns=columns)
-    # entropy_frame = calc_shannon_entropy(df)
-    # print(entropy_frame)
+    data_frame = read_data_frame()
+    tree = build_tree(data_frame)
+    print(tree)

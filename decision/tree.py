@@ -1,56 +1,90 @@
-__author__ = 'WangZhi'
-
-from decision.core import DecisionSet
+from decision.core import *
 
 
-class LeafNode():
-    def __init__(self, decision):
-        self._decision = decision
+class Tree:
+    """
+    the tree root node
+    """
+    def __init__(self, feature):
+        self._name = "Decision Root"
+        self._feature = feature
+        self._children = []
 
-    def get_decision(self):
-        return self._decision
+    def get_name(self):
+        return self._name
+
+    def get_feature(self):
+        return self._feature
+
+    def get_children(self):
+        return self._children
+
+    def add_child(self, child):
+        self._children.append(child)
 
 
-class BranchNode():
-    def __init__(self, property):
-        self._property = property
-        self._children = {}
+class Node:
+    """
+    the tree node
+    """
+    def __init__(self, parent, value, feature):
+        self._parent = parent
+        self._value = value
+        self._feature = feature
+        self._children = []
 
-    def add_child(self, value, node):
-        self._children[value] = node
+    def get_parent(self):
+        return self._parent
+
+    def get_value(self):
+        return self._value
+
+    def get_feature(self):
+        return self._feature
+
+    def get_children(self):
+        return self._children
+
+    def add_child(self, child):
+        self._children.append(child)
 
 
-def build_tree(root_set):
-    all_paths = root_set.get_decision_paths()
-    #如果没有决策路径则返回空
-    if len(all_paths) == 0:
-        return None
-    #如果决策集合只有一个决策路径
-    if len(all_paths) == 1:
-        return LeafNode(all_paths[0].get_decision())
-    property_name = root_set.find_best_property();
-    root = BranchNode(property_name)
-    sub_sets = root_set.split_by_property(property_name)
-    for (pro_value, sub_set) in sub_sets.items():
-        sub_node = build_sub_tree(sub_set)
-        root.add_child(pro_value, sub_node)
+def build_tree(data_frame):
+    # get result column
+    frame_columns = data_frame.columns
+    feature_count = len(frame_columns) - 1
+    result_title = frame_columns[feature_count]
+    base_entropy = calc_shannon_entropy(data_frame[result_title])
+    # if base_entropy is 0 means this is a leaf node
+    if base_entropy == 0:
+        result = data_frame[result_title][0]
+        return Tree(result);
+    best_feature = get_best_feature(data_frame)
+    root = Tree(best_feature)
+    sub_frames = split_by_feature(data_frame, best_feature)
+    # build sub tree
+    for feature_value, sub_frame in sub_frames.items():
+        sub_node = _build_sub_tree(root, feature_value, sub_frame)
+        root.add_child(sub_node)
     return root
 
-def build_sub_tree(path_set):
-    if is_end(path_set):
-        return LeafNode(path_set.get_decision_paths()[0].get_decision())
-    else:
-        property_name = path_set.find_best_property();
-        node = BranchNode(property_name)
-        sub_sets = path_set.split_by_property(property_name)
-        for (pro_value, sub_set) in sub_sets.items():
-            sub_node = build_sub_tree(sub_set)
-            node.add_child(pro_value, sub_node)
-        return node
 
-def is_end(path_set):
-    all_paths = path_set.get_decision_paths()
-    if len(all_paths) == 1:
-        return True
-    return False
+def _build_sub_tree(parent, feature_value, data_frame):
+    # get result column
+    frame_columns = data_frame.columns
+    feature_count = len(frame_columns) - 1
+    result_title = frame_columns[feature_count]
+    base_entropy = calc_shannon_entropy(data_frame[result_title])
+    # if base_entropy is 0 means this is a leaf node
+    if base_entropy == 0:
+        result = data_frame[result_title][0]
+        return Node(parent, feature_value, result)
+    best_feature = get_best_feature(data_frame)
+    node = Node(parent, feature_value, best_feature)
+    sub_frames = split_by_feature(data_frame, best_feature)
+    # build sub tree
+    for feature_value, sub_frame in sub_frames.items():
+        sub_node = _build_sub_tree(node, feature_value, sub_frame)
+        node.add_child(sub_node)
+    return node
 
