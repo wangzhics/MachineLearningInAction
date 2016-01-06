@@ -34,7 +34,7 @@ class Algorithm():
             if distance:
                 neighbor_distance = NeighborDistance(neighbor, distance)
                 neighbor_distances.append(neighbor_distance)
-                print(neighbor_distance)
+                # print(neighbor_distance)
         sorted_neighbor_distances = sorted(neighbor_distances, key=lambda n: n.get_distance())
         labels = []
         for neighbor_distance in sorted_neighbor_distances[0:top_k]:
