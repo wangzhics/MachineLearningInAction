@@ -56,3 +56,6 @@ class LogisticRegression:
         else:
             self._train_wth_iga()
         print(self._weights)
+
+    def get_weights(self):
+        return self._weights
