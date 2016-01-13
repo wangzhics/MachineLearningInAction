@@ -7,7 +7,7 @@ def paint_boundary(plot, weights_list, b_label, b_color, b_style):
     x_list = np.arange(-3.5, 3.5, 0.1)
     y_list = []
     for x in x_list:
-        y = (0 - weights_list[0][0] - weights_list[1][0] * x) / weights_list[2][0]
+        y = (0 - weights_list[0] - weights_list[1] * x) / weights_list[2]
         y_list.append(y)
     plt.plot(x_list, y_list, label=b_label, color=b_color, linestyle=b_style)
 
@@ -45,7 +45,13 @@ if __name__ == '__main__':
     plt.ylabel("X2")
     # training with GradientAscent
     lr.train(TrainAlgorithm.GradientAscent)
-    paint_boundary(plt, lr.get_weights().tolist(), "GradientAscent", "black", "solid")
+    paint_boundary(plt, lr.get_weights(), "GA", "black", "solid")
+    # training with RandomGradientAscent
+    lr.train(TrainAlgorithm.RandomGradientAscent)
+    paint_boundary(plt, lr.get_weights(), "RGA", "green", "dashed")
+    # training with Improved RandomGradientAscent
+    lr.train(TrainAlgorithm.ImproveGradientAscent)
+    paint_boundary(plt, lr.get_weights(), "IGA", "blue", "dashdot")
 
     plt.legend()
 
