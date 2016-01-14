@@ -78,7 +78,6 @@ class LogisticRegression:
                 del(data_index[rand_index])
         self._weights = weights
 
-
     def train(self, type):
         if type == TrainAlgorithm.GradientAscent:
             self._train_with_ga()
