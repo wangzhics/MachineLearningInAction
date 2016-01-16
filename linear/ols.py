@@ -1,45 +1,35 @@
 import numpy as np
-from pandas import DataFrame
 
 
 class OrdinaryLeastSquares:
-    def __init__(self):
+    def __init__(self, x_arrays, y_array):
         # train data
-        self._train_frame = DataFrame({"feature": [], "label": []})
+        self._x_arrays = x_arrays
+        self._y_array = y_array
         # train result
         self._had_regress = False
-        self._feature_mat = None
-        self._feature_mat_t = None
-        self._label_mat = None
+        self._x_mat = None
+        self._x_mat_t = None
+        self._y_mat = None
 
-    def set_train_frame(self, train_frame):
-        self._train_frame["feature"] = train_frame["feature"]
-        self._train_frame["label"] = train_frame["label"]
-
-    def add_train_features(self, train_features, train_labels):
-        for i in range(len(train_features)):
-            self._train_frame = \
-                self._train_frame.append({"feature": train_features[i], "label": train_labels[i]}, ignore_index=True)
-        self._had_regress = False
-
-    def regress(self, feature, k):
+    def regress(self, r_x, k):
         if not self._had_regress:
-            self._feature_mat = np.mat(self._train_frame["feature"].tolist())
-            self._feature_mat_t = self._feature_mat.transpose()
-            self._label_mat = np.mat(self._train_frame["label"].tolist()).transpose()
+            self._x_mat = np.mat(self._x_arrays)
+            self._x_mat_t = self._x_mat.transpose()
+            self._y_mat = np.mat(self._y_array).transpose()
             self._had_regress = True
-        m, n = np.shape(self._feature_mat)
+        m, n = np.shape(self._x_mat)
         weights_eye = np.eye(m)
-        feature_mat = np.mat(feature)
+        r_x_mat = np.mat(r_x)
         for i in range(m):
-            differ_mat = feature_mat - self._feature_mat[i, :]
+            differ_mat = r_x_mat - self._x_mat[i, :]
             # LWLR: Locally Weighted Linear Regression
             weights_eye[i, i] = np.exp(differ_mat * differ_mat.transpose() / (-2.0 * np.square(k)))
-        tmp_mat = self._feature_mat_t * weights_eye * self._feature_mat
+        tmp_mat = self._x_mat_t * weights_eye * self._x_mat
         tmp_mat_det = np.linalg.det(tmp_mat)
         if tmp_mat_det == 0.0:
             print("the xTx matrix is singular, can not do inverse")
             return
-        weights = np.linalg.inv(tmp_mat) * self._feature_mat_t * weights_eye * self._label_mat
+        weights = np.linalg.inv(tmp_mat) * self._x_mat_t * weights_eye * self._y_mat
         # get the value of 1 * 1 ,atrix
-        return np.sum(feature_mat * weights)
+        return np.sum(r_x_mat * weights)

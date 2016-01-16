@@ -1,4 +1,5 @@
 from linear.ols import OrdinaryLeastSquares
+from linear.standard import StandardRegress
 import matplotlib.pyplot as plt
 
 
@@ -19,8 +20,6 @@ def read_data():
 
 if __name__ == '__main__':
     x_arrays, y_array = read_data()
-    ols = OrdinaryLeastSquares()
-    ols.add_train_features(x_arrays, y_array)
     # sort x_arrays by x2
     xy_array = []
     for i in range(len(x_arrays)):
@@ -33,6 +32,7 @@ if __name__ == '__main__':
         x_arrays.append(xy[0])
         y_array.append(xy[1])
     # regress
+    ols = OrdinaryLeastSquares(x_arrays, y_array)
     x_array = []
     y1_array = []
     y2_array = []
@@ -50,5 +50,12 @@ if __name__ == '__main__':
     plt.scatter(x_array, y_array, alpha=0.5, s=10)
     plt.plot(x_array, y1_array, label="K=1.0", color="green", linestyle="solid")
     plt.plot(x_array, y2_array, label="K=0.01", color="black", linestyle="dashed")
+    # StandardRegress
+    y0_array = []
+    standard = StandardRegress(x_arrays, y_array)
+    standard.train()
+    for i in range(len(x_arrays)):
+        y0_array.append(standard.regress(x_arrays[i]))
+    plt.plot(x_array, y0_array, label="S", color="blue", linestyle="dotted")
     plt.legend()
     plt.savefig("ols.png")
