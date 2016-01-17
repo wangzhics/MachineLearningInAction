@@ -17,11 +17,11 @@ class RidgeRegress:
         x_mat = np.mat(self._x_arrays)
         y_mat = np.mat(self._y_array).transpose()
         m, n = np.shape(x_mat)
-        # standardization feature_mat
+        # standardization x_mat
         x_mean_mat = x_mat.mean(0)
         x_var_mat = np.var(x_mat, 0)  # variance
         self._s_x_mat = (x_mat - x_mean_mat) / x_var_mat
-        # standardization label_mat
+        # standardization y_mat
         y_mean_mat = y_mat.mean(0)
         self._s_y_mat = y_mat - y_mean_mat
 
@@ -36,12 +36,6 @@ class RidgeRegress:
             return
         weight_vector = np.linalg.inv(tmp_mat) * self._s_x_mat.transpose() * self._s_y_mat
         self._weights = weight_vector.tolist()
-
-    def regress(self, x):
-        label = 0.0
-        for i in range(len(self._weights)):
-            label += self._weights[i] * x[i]
-        return label
 
     def get_weights(self):
         return self._weights

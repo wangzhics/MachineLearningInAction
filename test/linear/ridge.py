@@ -1,9 +1,5 @@
 from linear.ridge import RidgeRegress
-from linear.standard import StandardRegress
-from pandas import DataFrame
 import matplotlib.pyplot as plt
-import numpy as np
-import math
 
 
 def read_data():
