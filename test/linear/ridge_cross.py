@@ -2,7 +2,7 @@ import random
 import numpy as np
 from test.linear.ridge import read_data
 from linear.ridge import RidgeRegress
-from linear.standard import StandardRegress
+from linear.ordinary import LeastSquares
 
 
 if __name__ == '__main__':
@@ -15,10 +15,10 @@ if __name__ == '__main__':
     # Standard Regress
     for x_array in x_arrays:
         x_array.insert(0, 1.0)
-    standard = StandardRegress(x_arrays, y_array)
-    standard.train()
-    print("\r\nStandardRegress's weights are:")
-    print(standard.get_weights())
+    ordinary = LeastSquares(x_arrays, y_array)
+    ordinary.train()
+    print("\r\nOrdinaryLastSquares's weights are:")
+    print(ordinary.get_weights())
 
 
 

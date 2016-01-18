@@ -1,5 +1,5 @@
-from linear.ols import OrdinaryLeastSquares
-from linear.standard import StandardRegress
+from linear.local_weight import LocallyWeighted
+from linear.ordinary import LeastSquares
 import matplotlib.pyplot as plt
 
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         x_arrays.append(xy[0])
         y_array.append(xy[1])
     # regress
-    ols = OrdinaryLeastSquares(x_arrays, y_array)
+    ols = LocallyWeighted(x_arrays, y_array)
     x_array = []
     y1_array = []
     y2_array = []
@@ -52,10 +52,10 @@ if __name__ == '__main__':
     plt.plot(x_array, y2_array, label="K=0.01", color="black", linestyle="dashed")
     # StandardRegress
     y0_array = []
-    standard = StandardRegress(x_arrays, y_array)
-    standard.train()
+    ordinary = LeastSquares(x_arrays, y_array)
+    ordinary.train()
     for i in range(len(x_arrays)):
-        y0_array.append(standard.regress(x_arrays[i]))
-    plt.plot(x_array, y0_array, label="S", color="blue", linestyle="dotted")
+        y0_array.append(ordinary.regress(x_arrays[i]))
+    plt.plot(x_array, y0_array, label="ols", color="blue", linestyle="dotted")
     plt.legend()
-    plt.savefig("ols.png")
+    plt.savefig("lwlr.png")

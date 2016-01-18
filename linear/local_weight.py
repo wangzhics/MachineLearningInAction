@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class OrdinaryLeastSquares:
+class LocallyWeighted:
     def __init__(self, x_arrays, y_array):
         # train data
         self._x_arrays = x_arrays

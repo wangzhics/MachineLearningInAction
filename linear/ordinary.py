@@ -2,7 +2,7 @@ import numpy as np
 from pandas import DataFrame
 
 
-class StandardRegress:
+class LeastSquares:
     def __init__(self, x_arrays, y_array):
         # train data
         self._x_arrays = x_arrays
