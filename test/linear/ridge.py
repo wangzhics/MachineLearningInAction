@@ -30,8 +30,7 @@ if __name__ == '__main__':
     wights_list = []
     # train and get weights
     for i in axis_x_list:
-        ridge.train(i)
-        wights_list.append(ridge.get_weights())
+        wights_list.append(ridge.calc_ridge_weight(i))
     # build y axis values
     for i in range(8):
         axis_y_list = []
