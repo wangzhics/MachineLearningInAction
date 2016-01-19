@@ -1,5 +1,6 @@
+from tr.core import Algorithm
 from tr.tree import build_tree
-
+import numpy as np
 
 def load_data(file_name):
     data_list = []
@@ -12,5 +13,6 @@ def load_data(file_name):
 
 if __name__ == '__main__':
     data_array = load_data("ex0.txt")
-    tree = build_tree(data_array)
+    data_mat = np.mat(data_array)
+    tree = build_tree(data_mat, algorithm=Algorithm.RegressTree)
     print(tree)

@@ -1,4 +1,10 @@
 import numpy as np
+from enum import Enum
+
+
+class Algorithm(Enum):
+    RegressTree = 1
+    ModelTree = 2
 
 
 def split_by_col(parent_mat, col_index, col_value):
@@ -35,7 +41,15 @@ def _to_set(input_mat):
     return r_set
 
 
-def get_best_split(parent_mat, min_variance_differ, min_row_count):
+def get_best_split(parent_mat, min_err, min_row_count, algorithm=Algorithm.RegressTree):
+    if algorithm == Algorithm.RegressTree:
+        return _get_best_regress_split(parent_mat, min_err, min_row_count)
+    elif algorithm == Algorithm.ModelTree:
+        return _get_best_model_split(parent_mat, min_err, min_row_count)
+    return _get_best_regress_split(parent_mat, min_err, min_row_count)
+
+
+def _get_best_regress_split(parent_mat, min_err, min_row_count):
     value_col = parent_mat[:, -1]
     # only has one value, do not split
     if len(_to_set(value_col)) == 1:
@@ -58,9 +72,13 @@ def get_best_split(parent_mat, min_variance_differ, min_row_count):
                 best_value = value
                 best_var = c_var
     # if the variance between parent and children is too small, do not split
-    if (p_var - best_var) < min_variance_differ:
+    if (p_var - best_var) < min_err:
         return -1, _calc_mean(parent_mat)
     return best_index, best_value
+
+
+def _get_best_model_split(parent_mat, min_err, min_row_count):
+    pass
 
 
 
