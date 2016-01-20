@@ -28,7 +28,7 @@ class TreeNode:
 
 def build_tree(parent_mat, algorithm=Algorithm.RegressTree, min_err=1, min_row_count=4):
     parent_node = TreeNode()
-    best_index, best_value = get_best_split(parent_mat, min_err, min_row_count)
+    best_index, best_value = get_best_split(parent_mat, algorithm, min_err, min_row_count)
     if best_index == -1:
         parent_node.value = best_value
         return parent_node
