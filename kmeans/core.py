@@ -107,9 +107,13 @@ class BisectKMeans:
         first_cluster.err = first_err
         cluster_list.append(first_cluster)
         # try split cluster in cluster_list
-        while len(cluster_list) < k:
+        add_count = 0
+        while add_count < (k-1):
+            # sort the cluster_list by err
+            cluster_list.sort(key=lambda c:c.err, reverse=True)
             has_split = False
-            for i in range(len(cluster_list)):
+            n = len(cluster_list)
+            for i in range(n):
                 cluster = cluster_list[i]
                 sub_simple = SimpleKMeans(cluster.elements)
                 sub_cluster_list = sub_simple.cluster(2)
@@ -118,6 +122,8 @@ class BisectKMeans:
                     cluster_list[i] = sub_cluster_list[0]  # replace current from first
                     cluster_list.append(sub_cluster_list[1]) # add second to list tail
                     has_split = True
+                    add_count += 1
+                    break
             if has_split is False:  # can not split anymore
                 break
         self._cluster_result = cluster_list
