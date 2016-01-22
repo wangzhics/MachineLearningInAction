@@ -75,7 +75,7 @@ class AprioriSet:
             # add priori_list
             for priori in priori_list:
                 if priori.support >= min_f:
-                    if r_setlen(priori.a_set) == 1:
+                    if len(priori.a_set) == 1:
                         tmp_list.append(copy.copy(priori))
                     else:
                         tmp_list.append(priori)
