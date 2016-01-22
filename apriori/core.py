@@ -2,7 +2,6 @@ import copy
 
 
 class RelatedSet:
-    __hash__ = object.__hash__
     def __init__(self, p_set, h_set, degree):
         self.p_set = p_set
         self.h_set = h_set
@@ -11,8 +10,6 @@ class RelatedSet:
     def __str__(self, *args, **kwargs):
         return "{'p_set': %s, 'p_set': %s, 'degree:' %f}" % (str(self.p_set), str(self.h_set), self.degree)
 
-    def __eq__(self, obj):
-        return self.p_set == obj.p_set and self.h_set == obj.h_set
 
 
 class SupportSet:
@@ -55,17 +52,18 @@ class AprioriSet:
         k = len(priori_list)
         if k < 2:
             return []
-        next_set_list = []
-        next_set = set()
+        join_set_list = []
+        join_set = set()
         for i in range(k - 1):
             for j in range(i + 1, k):
                 tmp_set = priori_list[i].a_set | priori_list[j].a_set
                 tmp_set = frozenset(tmp_set)
-                if tmp_set not in next_set:
-                    tmp_set = frozenset(tmp_set)
-                    next_set_list.append(SupportSet(tmp_set, self.calc_support(tmp_set)))
-                    next_set.add(tmp_set)
-        return next_set_list
+                if tmp_set in join_set:
+                    continue
+                tmp_set = frozenset(tmp_set)
+                join_set_list.append(SupportSet(tmp_set, self.calc_support(tmp_set)))
+                join_set.add(tmp_set)
+        return join_set_list
 
     def get_frequent_set(self, min_f=0.5):
         frequent_list = []
@@ -77,7 +75,7 @@ class AprioriSet:
             # add priori_list
             for priori in priori_list:
                 if priori.support >= min_f:
-                    if len(priori.a_set) == 1:
+                    if r_setlen(priori.a_set) == 1:
                         tmp_list.append(copy.copy(priori))
                     else:
                         tmp_list.append(priori)
@@ -89,6 +87,7 @@ class AprioriSet:
         return frequent_list
 
     def _build_split_sets(self, full_set_list, min_d):
+        split_set_list = set()
         split_set = set()
         for full_set in full_set_list:
             p_len = len(full_set.p_set)
@@ -101,17 +100,20 @@ class AprioriSet:
                 t_h_set = set(full_set.h_set.copy())
                 t_p_set.remove(p)
                 t_h_set.add(p)
-                # frozenset
+                # if f_p_set already exists
                 f_p_set = frozenset(t_p_set)
+                if f_p_set in split_set:
+                    continue
+                split_set.add(f_p_set)
+                # build RelatedSet
                 f_h_set = frozenset(t_h_set)
                 p_support = self.calc_support(f_p_set)
                 full_support = self.calc_support((f_p_set | f_h_set))
                 degree =  full_support / p_support
                 if degree >= min_d:
                     r_set = RelatedSet(f_p_set, f_h_set, degree)
-                    if r_set not in split_set:
-                        split_set.add(r_set)
-        return list(split_set)
+                    split_set_list.add(r_set)
+        return split_set_list
 
     def get_related_set(self, support_set, min_d=0.5):
         related_set_list = []
