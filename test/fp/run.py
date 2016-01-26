@@ -12,6 +12,8 @@ def load_simple_data():
 
 if __name__ == '__main__':
     data_set = load_simple_data()
-    fp = FPTree(data_set, 3)
-    print(fp.get_head())
-    print(fp.get_tree())
+    new_data_set = []
+    for data in data_set:
+        new_data_set.append([data, 1])
+    fp = FPTree(new_data_set, 3)
+    fp.get_frequency_set(frozenset([]))
